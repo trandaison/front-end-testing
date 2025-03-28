@@ -1,6 +1,6 @@
 function fetchProduct() {
   return new Promise((resolve, reject) => {
-    fetch("https://fakestoreapi.com/products/100")
+    fetch("https://fakestoreapi.com/products/1")
       .then((res) => res.json())
       .then((data) => data ? resolve(data) : reject(new Error("No data")))
       .catch((err) => reject(err))
