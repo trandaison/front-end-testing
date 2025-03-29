@@ -2,14 +2,17 @@
 // Có thể thực hiện refactor code trong quá trình làm.
 
 export class AuthService {
-  async login(credentials: { username: string; password: string }) {
-    const response = await fetch('https://fakestoreapi.com/auth/login', {
+  async login(fetchData: typeof fetch, credentials: { username: string; password: string }) {
+    const response = await fetchData('https://fakestoreapi.com/auth/login', {
       method: 'POST',
       body: JSON.stringify(credentials),
     });
+
+
     if (!response.ok) {
       throw new Error('Login failed');
     }
+
     const data = await response.json();
     if (!data.token) {
       throw new Error('Invalid token');
