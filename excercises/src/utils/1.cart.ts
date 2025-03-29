@@ -8,6 +8,6 @@ export type Product = {
 
 export function calculateTotalPrice(products: Product[]) {
   return products.reduce((total, product) => {
-    return total + (product.price * product.quantity);
+    return total + (Math.max(0, product.price) * Math.max(0, product.quantity));
   }, 0);
 }
