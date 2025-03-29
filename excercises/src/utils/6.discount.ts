@@ -1,53 +1,106 @@
-type CustomerClass = 'VIP' | 'PREMIUM' | 'NORMAL';
+type CustomerClass = "VIP" | "PREMIUM" | "NORMAL";
 
 type DiscountOptions = {
   customerClass?: CustomerClass;
   discountVoucherCode?: string;
+};
+
+// Constants for discount rates
+const DISCOUNT_RATES = {
+  CUSTOMER_CLASS: {
+    VIP: 0.1, // 10%
+    PREMIUM: 0.05, // 5%
+    NORMAL: 0, // 0%
+  },
+  VOUCHER: {
+    WELCOME10: 0.1, // 10%
+    BLACKFRIDAY: 0.3, // 30%
+  },
+  LARGE_ORDER: 0.05, // 5%
+};
+
+// Threshold for large orders (2 million VND)
+const LARGE_ORDER_THRESHOLD = 2000000;
+
+/**
+ * Calculate customer class discount rate based on customer class
+ * @param customerClass The class of the customer
+ * @returns The discount rate for the customer class
+ */
+function getCustomerClassDiscountRate(customerClass?: CustomerClass): number {
+  if (!customerClass) return 0;
+  return DISCOUNT_RATES.CUSTOMER_CLASS[customerClass] || 0;
 }
 
 /**
- * Hàm tính toán số tiền giảm giá dựa trên giá trị đơn hàng và tỷ lệ giảm giá.
- * Đối với khách hàng VIP, giảm giá 10% trên tổng giá trị đơn hàng.
- * Đối với khách hàng PREMIUM, giảm giá 5% trên tổng giá trị đơn hàng.
- * Đối với khách hàng NORMAL, giảm giá 0% trên tổng giá trị đơn hàng.
- * Discount voucher code "WELCOME10" sẽ giảm thêm 10% trên tổng giá trị đơn hàng.
- * Discount voucher code "BLACKFRIDAY" sẽ giảm thêm 30% trên tổng giá trị đơn hàng.
- * Nếu không có discount voucher code nào, sẽ giảm chiết khấu 5% trên tổng giá trị đơn hàng nếu đơn hàng lớn hơn 2 triệu đồng.
- * Tổng giá trị giảm giá không được vượt quá giá trị đơn hàng.
- * @param price nguyên giá trị đơn hàng
- * @param discountOptions các tùy chọn giảm giá
- * @returns số tiền giảm giá
+ * Calculate voucher discount rate based on voucher code
+ * @param voucherCode The voucher code
+ * @returns The discount rate for the voucher
  */
+function getVoucherDiscountRate(voucherCode?: string): number {
+  if (!voucherCode) return 0;
 
-export function calculateDiscount(price: number, discountOptions: DiscountOptions = {}): number {
+  switch (voucherCode) {
+    case "WELCOME10":
+      return DISCOUNT_RATES.VOUCHER.WELCOME10;
+    case "BLACKFRIDAY":
+      return DISCOUNT_RATES.VOUCHER.BLACKFRIDAY;
+    default:
+      return 0;
+  }
+}
+
+/**
+ * Check if an order qualifies for large order discount
+ * @param price The order price
+ * @param hasVoucher Whether the order already has a voucher applied
+ * @returns The large order discount rate if applicable, otherwise 0
+ */
+function getLargeOrderDiscountRate(price: number, hasVoucher: boolean): number {
+  if (!hasVoucher && price > LARGE_ORDER_THRESHOLD) {
+    return DISCOUNT_RATES.LARGE_ORDER;
+  }
+  return 0;
+}
+
+/**
+ * Calculate the maximum allowed discount amount
+ * @param price The order price
+ * @param discountAmount The calculated discount amount
+ * @returns The capped discount amount
+ */
+function capDiscountAmount(price: number, discountAmount: number): number {
+  return Math.min(price, discountAmount);
+}
+
+/**
+ * Calculate discount amount for an order based on various discount rules
+ * @param price The original order price
+ * @param discountOptions Options that affect discount calculation
+ * @returns The calculated discount amount
+ */
+export function calculateDiscount(
+  price: number,
+  discountOptions: DiscountOptions = {}
+): number {
+  // Validate input
   if (price <= 0) return 0;
 
   const { customerClass, discountVoucherCode } = discountOptions;
 
-  let discountRate = 0;
-  switch (customerClass) {
-    case 'VIP':
-      discountRate = 0.1; // 10%
-      break;
-    case 'PREMIUM':
-      discountRate = 0.05; // 5%
-      break;
-    case 'NORMAL':
-      discountRate = 0; // 0%
-      break;
-    default:
-      discountRate = 0; // 0%
-  }
+  // Calculate individual discount components
+  const customerClassDiscount = getCustomerClassDiscountRate(customerClass);
+  const voucherDiscount = getVoucherDiscountRate(discountVoucherCode);
+  const largeOrderDiscount = getLargeOrderDiscountRate(
+    price,
+    !!discountVoucherCode
+  );
 
-  if (discountVoucherCode === 'WELCOME10') {
-    discountRate += 0.1; // 10%
-  } else if (discountVoucherCode === 'BLACKFRIDAY') {
-    discountRate += 0.3; // 30%
-  } else if (!discountVoucherCode && price > 2000000) {
-    discountRate += 0.05; // 5%
-  }
+  // Combine all discount rates
+  const totalDiscountRate =
+    customerClassDiscount + voucherDiscount + largeOrderDiscount;
 
-  const discount = price * discountRate;
-
-  return discount > price ? price : discount;
+  // Calculate and cap the discount amount
+  const discountAmount = price * totalDiscountRate;
+  return capDiscountAmount(price, discountAmount);
 }
