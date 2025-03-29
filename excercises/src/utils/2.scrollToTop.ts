@@ -11,3 +11,6 @@ export function useScrollToTop(element: HTMLElement = document.documentElement, 
     scrollToTop,
   }
 }
+
+
+// use spyOn to mock scrollTo method
