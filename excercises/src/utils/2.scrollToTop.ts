@@ -1,3 +1,9 @@
+export type ScrollOptions = {
+  behavior: ScrollBehavior;
+  top?: number;
+  left?: number;
+};
+
 export function useScrollToTop(element: HTMLElement = document.documentElement, options: ScrollOptions = { behavior: 'smooth' }) {
   function scrollToTop() {
     element.scrollTo({
@@ -9,5 +15,5 @@ export function useScrollToTop(element: HTMLElement = document.documentElement, 
 
   return {
     scrollToTop,
-  }
+  };
 }
