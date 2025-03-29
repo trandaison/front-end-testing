@@ -23,7 +23,7 @@ export class AuthService {
     if (!userResponse.ok) return 'Failed to login';
 
     const userData = await userResponse.json();
-    if (!userData) return 'Failed to login';
+    if (!userData || Object.keys(userData).length === 0) return 'Failed to login';
 
     return userData;
   }
