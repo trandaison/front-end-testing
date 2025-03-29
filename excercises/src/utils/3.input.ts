@@ -27,7 +27,7 @@ export function validateUserInput(input: UserInput): true | string[] {
   } else if (password.length < 6 || password.length > 40) {
     errors.push('Password must be between 6 and 40 characters');
   }
-  if (!/[A-Z]/.test(password)) {
+  if (password && !/[A-Z]/.test(password)) {
     errors.push('Password must contain at least one uppercase letter');
   }
 

@@ -11,3 +11,6 @@ export function calculateTotalPrice(products: Product[]) {
     return total + (product.price * product.quantity);
   }, 0);
 }
+
+// write test case for cart test of calculateTotalPrice
+// ".calculateTotalPrice"

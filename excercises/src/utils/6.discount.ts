@@ -19,35 +19,51 @@ type DiscountOptions = {
  * @returns số tiền giảm giá
  */
 
+// Write test case for calculateDiscount with cases:
+// 1. price is 0
+// 2. price is 1000000, customerClass is VIP, discountVoucherCode is WELCOME10
+// 3. price is 1000000, customerClass is VIP, discountVoucherCode is BLACKFRIDAY
+// 4. price is 1000000, customerClass is VIP
+// 5. price is 1000000, customerClass is PREMIUM
+// 6. price is 1000000, customerClass is NORMAL
+// 7. price is 1000000, discountVoucherCode is WELCOME10
+// 8. price is 1000000, discountVoucherCode is BLACKFRIDAY
+// 9. price is 1000000
+// 12. price is 2000000
+// 14. price is 2000000, customerClass is PREMIUM
+// 15. price is 2000000, customerClass is NORMAL
+// 18. price is 2000000, customerClass is VIP
+// 16. price is 2000000, customerClass is VIP, discountVoucherCode is WELCOME10
+// 17. price is 2000000, customerClass is VIP, discountVoucherCode is BLACKFRIDAY
+// 21. price is 2000000, discountVoucherCode is WELCOME10
+// 22. price is 2000000, discountVoucherCode is BLACKFRIDAY
+
+enum CustomerDiscountRate {
+  VIP = 0.1, // 10%
+  PREMIUM = 0.05, // 5%
+  NORMAL = 0, // 0%
+  DEFAULT = 0 // 0%
+}
+
+enum DiscountVoucherRate {
+  WELCOME10 = 0.1, // 10%
+  BLACKFRIDAY = 0.3, // 30%
+}
+
 export function calculateDiscount(price: number, discountOptions: DiscountOptions = {}): number {
   if (price <= 0) return 0;
 
   const { customerClass, discountVoucherCode } = discountOptions;
 
-  let discountRate = 0;
-  switch (customerClass) {
-    case 'VIP':
-      discountRate = 0.1; // 10%
-      break;
-    case 'PREMIUM':
-      discountRate = 0.05; // 5%
-      break;
-    case 'NORMAL':
-      discountRate = 0; // 0%
-      break;
-    default:
-      discountRate = 0; // 0%
-  }
+  let discountRate = customerClass ? CustomerDiscountRate[customerClass] : CustomerDiscountRate.DEFAULT;
 
-  if (discountVoucherCode === 'WELCOME10') {
-    discountRate += 0.1; // 10%
-  } else if (discountVoucherCode === 'BLACKFRIDAY') {
-    discountRate += 0.3; // 30%
-  } else if (!discountVoucherCode && price > 2000000) {
-    discountRate += 0.05; // 5%
+  if (discountVoucherCode && DiscountVoucherRate[discountVoucherCode as keyof typeof DiscountVoucherRate] !== undefined) {
+    discountRate += DiscountVoucherRate[discountVoucherCode as keyof typeof DiscountVoucherRate];
+  } else if (!discountVoucherCode) {
+    discountRate += price >= 2000000 ? 0.05 : 0;
   }
 
   const discount = price * discountRate;
 
-  return discount > price ? price : discount;
+  return Math.round(discount);
 }

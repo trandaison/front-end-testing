@@ -28,3 +28,11 @@ export class AuthService {
     return userData;
   }
 }
+
+// write test case .login for AuthService with cases:
+// 1. login but Failed with Invalid login credentials
+// 2. login but Failed to login
+// 3. login successfully
+// 4. login successfully but failed to get user
+// 5. login successfully and get user successfully
+// Use mock Promise to mock fetch function
