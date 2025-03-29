@@ -4,10 +4,17 @@ export type Product = {
   product_id: number;
   price: number;
   quantity: number;
+};
+
+export function calculatePrice(product: Product) {
+  const priceNumber = Number(product.price) || 0;
+  const quantityNumber = Number(product.quantity) || 0;
+
+  return priceNumber * quantityNumber;
 }
 
 export function calculateTotalPrice(products: Product[]) {
   return products.reduce((total, product) => {
-    return total + (product.price * product.quantity);
+    return total + calculatePrice(product);
   }, 0);
 }
