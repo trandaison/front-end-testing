@@ -49,5 +49,5 @@ export function calculateDiscount(price: number, discountOptions: DiscountOption
 
   const discount = price * discountRate;
 
-  return discount > price ? price : discount;
+  return Math.min(discount, price);
 }
