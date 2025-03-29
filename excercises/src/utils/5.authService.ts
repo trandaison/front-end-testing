@@ -2,28 +2,42 @@
 // Có thể thực hiện refactor code trong quá trình làm.
 
 export class AuthService {
-  async login(credentials: { username: string; password: string }) {
-    // Setp 1: get token with username and password
-    const response = await fetch('https://fakestoreapi.com/auth/login', {
-      method: 'POST',
+  async fetchToken(credentials: {
+    username: string;
+    password: string;
+  }): Promise<string | null> {
+    const response = await fetch("https://fakestoreapi.com/auth/login", {
+      method: "POST",
       body: JSON.stringify(credentials),
     });
-    if (!response.ok) return 'Invalid login credentials';
+    if (!response.ok) return null;
 
     const data = await response.json();
-    if (!data.token) return 'Invalid login credentials';
+    return data.token || null;
+  }
 
-    // Step 2: get user with token
-    const userResponse = await fetch('https://fakestoreapi.com/auth/user', {
-      method: 'GET',
+  async fetchUser(token: string): Promise<any | null> {
+    const response = await fetch("https://fakestoreapi.com/auth/user", {
+      method: "GET",
       headers: {
-        'Authorization': `Bearer ${data.token}`,
+        Authorization: `Bearer ${token}`,
       },
     });
-    if (!userResponse.ok) return 'Failed to login';
+    if (!response.ok) return null;
 
-    const userData = await userResponse.json();
-    if (!userData) return 'Failed to login';
+    try {
+      return await response.json();
+    } catch (error) {
+      return null; // Bắt lỗi JSON parse
+    }
+  }
+
+  async login(credentials: { username: string; password: string }) {
+    const token = await this.fetchToken(credentials);
+    if (!token) return "Invalid login credentials";
+
+    const userData = await this.fetchUser(token);
+    if (!userData || !userData?.id) return "Failed to login";
 
     return userData;
   }
